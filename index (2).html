@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Our Digital Scrapbook! 📸💛</title>
+  <style>
+    :root {
+      --bg-color: #12131C;
+      --card-bg: #1e202e;
+      --paper-color: #fdfbf7;
+      --accent: #ff5277;
+      --subtext: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Courier New', Courier, monospace, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    /* STEP 1: SCRATCH-OFF CONTAINER */
+    #scratch-stage {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      background: #1e202e;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 15px rgba(255, 82, 119, 0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+      padding: 20px;
+    }
+
+    .reveal-message {
+      color: #fff;
+      font-size: 1.1rem;
+      line-height: 1.5;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 320px;
+      height: 320px;
+      border-radius: 20px;
+      cursor: pointer;
+      touch-action: none;
+    }
+
+    /* STEP 2: PHOTO GALLERY (Hidden by default) */
+    #scrapbook-stage {
+      display: none;
+      width: 100%;
+      max-width: 800px;
+      text-align: center;
+      animation: fadeIn 1s ease-in-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .gallery-title {
+      color: #fff;
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+
+    .gallery-subtitle {
+      color: var(--subtext);
+      font-size: 0.95rem;
+      margin-bottom: 30px;
+    }
+
+    /* Scrapbook Polaroid Grid */
+    .polaroid-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+    }
+
+    /* Flip Card effect */
+    .polaroid-card {
+      background: transparent;
+      width: 230px;
+      height: 290px;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+
+    /* Slight Card Rotations */
+    .polaroid-card:nth-child(1) { transform: rotate(-4deg); }
+    .polaroid-card:nth-child(2) { transform: rotate(3deg); }
+    .polaroid-card:nth-child(3) { transform: rotate(-2deg); }
+
+    .polaroid-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.8s;
+      transform-style: preserve-3d;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+      border-radius: 4px;
+    }
+
+    .polaroid-card.flipped .polaroid-inner {
+      transform: rotateY(180deg);
+    }
+
+    .polaroid-front, .polaroid-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      background: var(--paper-color);
+      padding: 15px 15px 40px 15px;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Washi Tape Accent */
+    .polaroid-front::before {
+      content: '';
+      position: absolute;
+      top: -12px;
+      width: 70px;
+      height: 25px;
+      background: rgba(255, 82, 119, 0.2); /* Pink tint */
+      border: 1px dashed rgba(255, 82, 119, 0.4);
+      transform: rotate(-5deg);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .polaroid-front img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 2px;
+      background: #ccc; /* Placeholder color */
+    }
+
+    .polaroid-front span {
+      font-weight: bold;
+      color: #444;
+      font-size: 0.9rem;
+      margin-top: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Back of Polaroid (Written Note) */
+    .polaroid-back {
+      transform: rotateY(180deg);
+      justify-content: center;
+      text-align: center;
+      padding: 25px;
+      background: #fffef0;
+      color: #2c3e50;
+      line-height: 1.5;
+      font-size: 0.9rem;
+      border: 1px solid #eee;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- STEP 1: SCRATCH OFF STAGE -->
+  <div id="scratch-stage">
+    <div class="reveal-message">
+      <h2>🎉 UNLOCKED!</h2>
+      <p style="margin-top:10px; font-size:0.9rem; color:#cbd5e1;">Scroll down to see our memories!</p>
+    </div>
+    <canvas id="scratchCanvas"></canvas>
+  </div>
+
+  <!-- STEP 2: PHOTO POLAROID GALLERY -->
+  <div id="scrapbook-stage">
+    <h1 class="gallery-title">Best Friends Forever 📸💛</h1>
+    <p class="gallery-subtitle">A digital scrapbook of my favorite moments with you. Tap a photo to flip it!</p>
+
+    <div class="polaroid-grid">
+      
+      <!-- PHOTO 1 -->
+      <div class="polaroid-card" onclick="flipCard(this)">
+        <div class="polaroid-inner">
+          <div class="polaroid-front">
+            <!-- replace with photo1.jpg -->
+            <img src="photo12.jpeg" alt="Us in the sendup exams">
+            <span>Us and sendup exams </span>
+          </div>
+          <div class="polaroid-back">
+            <p>Remember where we took this pic in senups exam? My favorite kind of chaos.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHOTO 2 -->
+      <div class="polaroid-card" onclick="flipCard(this)">
+        <div class="polaroid-inner">
+          <div class="polaroid-front">
+            <!-- replace with photo2.jpg -->
+            <img src="photo13.jpeg" alt="Us in sendups exam">
+            <span>Big Smile Day! 😄</span>
+          </div>
+          <div class="polaroid-back">
+            <p>With you i always flirt and miss that time alot.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHOTO 3 -->
+      <div class="polaroid-card" onclick="flipCard(this)">
+        <div class="polaroid-inner">
+          <div class="polaroid-front">
+            <!-- replace with photo3.jpg -->
+            <img src="photo18.jpeg" alt="Best pic">
+            <span>Miss those old days alot✨</span>
+          </div>
+          <div class="polaroid-back">
+            <p>Your sunkissed pic in beautiful yellow desi suit.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Canvas Scratch Off Logic (Remains the same as previous)
+    const canvas = document.getElementById('scratchCanvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+
+    function initCanvas() {
+      canvas.width = 320;
+      canvas.height = 320;
+      ctx.fillStyle = '#b91c1c'; // Red Wax Seal Color
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#fef08a';
+      ctx.font = 'bold 18px Courier New';
+      ctx.textAlign = 'center';
+      ctx.fillText('🔒 MEMORY LOCKED', 160, 150);
+      ctx.font = '12px Courier New';
+      ctx.fillText('Rub the seal to open!', 160, 180);
+    }
+
+    function scratch(e) {
+      if (!isDrawing) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX || e.touches[0].clientX) - rect.left;
+      const y = (e.clientY || e.touches[0].clientY) - rect.top;
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(x, y, 25, 0, Math.PI * 2);
+      ctx.fill();
+      checkProgress();
+    }
+
+    function checkProgress() {
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      let clearPixels = 0;
+      for (let i = 3; i < imgData.data.length; i += 16) {
+        if (imgData.data[i] === 0) clearPixels++;
+      }
+      if (clearPixels > (imgData.data.length / 16) * 0.4) {
+        canvas.style.transition = 'opacity 0.8s ease';
+        canvas.style.opacity = '0';
+        setTimeout(() => {
+          canvas.style.display = 'none';
+          document.getElementById('scrapbook-stage').style.display = 'block';
+        }, 800);
+      }
+    }
+
+    canvas.addEventListener('mousedown', () => isDrawing = true);
+    canvas.addEventListener('mouseup', () => isDrawing = false);
+    canvas.addEventListener('mousemove', scratch);
+    canvas.addEventListener('touchstart', () => isDrawing = true);
+    canvas.addEventListener('touchend', () => isDrawing = false);
+    canvas.addEventListener('touchmove', scratch);
+
+    // Card Flip Logic
+    function flipCard(card) {
+      card.classList.toggle('flipped');
+    }
+
+    initCanvas();
+  </script>
+</body>
+</html>
